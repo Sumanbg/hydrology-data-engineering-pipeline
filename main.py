@@ -5,21 +5,21 @@ from transform import transform_readings
 
 BASE_URL = "https://environment.data.gov.uk/hydrology/id/measures"
 
-# Chesterfield (River Hipper) station GUID
-STATION_ID = "2320611b-8413-4964-a538-04fe9d43d09e"
-STATION_LABEL = "Chesterfield"
+# Chesterfield Park Road Bridge (River Hipper)
+STATION_ID = "2e1a5cc0-7eaf-4daf-ab1c-e36e7ea2c61d"
+STATION_NAME = "Chesterfield Park Road Bridge"
 RIVER_NAME = "River Hipper"
-LATITUDE = 53.231113
-LONGITUDE = -1.454091
+LATITUDE = 53.232983
+LONGITUDE = -1.430981
 
-INSTANT_MEASURE = "2320611b-8413-4964-a538-04fe9d43d09e-level-i-900-m-qualified"
-DAILY_MAX_MEASURE = "2320611b-8413-4964-a538-04fe9d43d09e-level-max-86400-m-qualified"
+INSTANT_MEASURE = "2e1a5cc0-7eaf-4daf-ab1c-e36e7ea2c61d-level-i-900-m-qualified"
+DAILY_MAX_MEASURE = "2e1a5cc0-7eaf-4daf-ab1c-e36e7ea2c61d-level-max-86400-m-qualified"
 
 
 def get_latest_readings(measure_id):
     url = f"{BASE_URL}/{measure_id}/readings"
 
-    # Fetch more data first
+    # Fetch more records first
     params = {"_limit": 100}
 
     response = requests.get(url, params=params)
@@ -28,7 +28,7 @@ def get_latest_readings(measure_id):
     data = response.json()
     items = data.get("items", [])
 
-    # Sort by dateTime descending (newest first)
+    # Sort newest first
     sorted_items = sorted(
         items,
         key=lambda x: x.get("dateTime", ""),
@@ -50,7 +50,7 @@ def main():
     # Step 2: Insert station dimension
     station_tuple = (
         STATION_ID,
-        STATION_LABEL,
+        STATION_NAME,
         RIVER_NAME,
         LATITUDE,
         LONGITUDE
@@ -62,8 +62,17 @@ def main():
     daily_data = get_latest_readings(DAILY_MAX_MEASURE)
 
     # Step 4: Transform
-    instant_rows = transform_readings(STATION_ID, "instantaneous_15min", instant_data)
-    daily_rows = transform_readings(STATION_ID, "daily_max", daily_data)
+    instant_rows = transform_readings(
+        STATION_ID,
+        "instantaneous_15min",
+        instant_data
+    )
+
+    daily_rows = transform_readings(
+        STATION_ID,
+        "daily_max",
+        daily_data
+    )
 
     # Step 5: Load
     insert_measurements(instant_rows)

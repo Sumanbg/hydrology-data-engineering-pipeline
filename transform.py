@@ -10,15 +10,14 @@ def transform_readings(station_id, measure_type, api_data):
         date_time = item.get("dateTime")
         value = item.get("value")
 
-        # Only keep valid numeric values
-        if value is not None:
-            transformed_rows.append(
-                (
-                    station_id,
-                    measure_type,
-                    date_time,
-                    float(value)
-                )
+        # Keep all 10 readings, even if value is None
+        transformed_rows.append(
+            (
+                station_id,
+                measure_type,
+                date_time,
+                float(value) if value is not None else None
             )
+        )
 
     return transformed_rows
