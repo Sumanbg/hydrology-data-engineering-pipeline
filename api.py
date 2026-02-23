@@ -12,7 +12,8 @@ def get_latest_readings(measure_id):
     """
     url = f"{BASE_URL}/{measure_id}/readings"
     params = {
-        "_limit": 10
+        "_limit": 10,
+        "_sorted": "-dateTime"
     }
 
     response = requests.get(url, params=params)
